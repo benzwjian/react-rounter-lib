@@ -1,38 +1,13 @@
 import React, { Component } from 'react';
-import createHistory from 'history/createBrowserHistory';
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Redirect,
+  Switch
+} from 'react-router-dom'
 import PropTypes from 'prop-types';
 import './css/semantic.min.css';
-
-const Route = ({path, component}, {location}) => { //stateless component, get context object from second argument
-  const pathname = location.pathname
-  if (pathname.match(path)) {
-    return (
-      React.createElement(component)
-    )
-  } else {
-    return null
-  }
-}
-
-Route.contextTypes = {
-  location: PropTypes.object
-}
-
-const Link = ({to, children}, {history}) => ( //stateless component, get context object from second argument
-  <a
-    onClick={(e) => {
-      e.preventDefault();
-      history.push(to);
-    }}
-    href={to}
-  >
-    {children}
-  </a>
-)
-
-Link.contextTypes = {
-  history: PropTypes.object
-}
 
 const Atlantic = () => ( //stateless component
   <div>
@@ -87,46 +62,6 @@ class BlackSea extends Component {
   }
 }
 
-class Redirect extends Component {
-  static contextTypes = {
-    history: PropTypes.object
-  }
-
-  componentDidMount() {
-    const history = this.context.history  //get context object in stateful component
-    const to = this.props.to
-    history.push(to)
-  }
-
-  render() {
-    return null
-  }
-}
-
-class Router extends Component {
-  static childContextTypes = {
-    history: PropTypes.object,
-    location: PropTypes.object
-  }
-
-  constructor(props) {
-    super(props)
-    this.history = createHistory()
-    this.history.listen(() => this.forceUpdate())
-  }
-
-  getChildContext() { //define context object will pass down to all children components
-    return {
-      history: this.history,
-      location: window.location
-    }
-  }
-
-  render() {
-    return this.props.children
-  }
-}
-
 class App extends Component {
   render() {
     return (
@@ -156,9 +91,31 @@ class App extends Component {
 
           <hr />
 
-          <Route path='/atlantic' component={Atlantic} />
-          <Route path='/pacific' component={Pacific} />
-          <Route path='/black-sea' component={BlackSea} />
+          <Switch>
+            <Route exact path='/' render={() => (
+              <h3>
+                Welcome! Select a body of saline water above.
+              </h3>
+            )} />
+            <Route exact path='/atlantic/ocean' render={() => (
+              <div>
+                <h3>Atlantic Ocean - Again!</h3>
+                <p>
+                  Also known as "The Pond."
+                </p>
+              </div>
+            )} />
+            <Route exact path='/atlantic' component={Atlantic} />
+            <Route exact path='/pacific' component={Pacific} />
+            <Route exact path='/black-sea' component={BlackSea} />
+            <Route render={({location}) => (
+              <div className='ui inverted red segment'>
+                <h3>
+                  Error! No matches for <code>{location.pathname}</code>
+                </h3>
+              </div>
+            )} />
+          </Switch>
         </div>
       </Router>
     );
